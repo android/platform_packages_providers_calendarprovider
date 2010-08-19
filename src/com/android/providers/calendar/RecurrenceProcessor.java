@@ -748,7 +748,9 @@ byday:
                 while (true) {
                     int monthIndex = 0;
                     if (failsafe++ > MAX_ALLOWED_ITERATIONS) { // Give up after about 1 second of processing
-                        throw new DateException("Recurrence processing stuck: " + r.toString());
+                        Log.w(TAG, "Recurrence processing stuck with r=" + r + " rangeStart="
+                                + rangeStartDateValue + " rangeEnd=" + rangeEndDateValue);
+                        break;
                     }
 
                     unsafeNormalize(iterator);
