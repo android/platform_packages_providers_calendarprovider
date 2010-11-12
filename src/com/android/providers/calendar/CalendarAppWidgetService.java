@@ -566,11 +566,10 @@ public class CalendarAppWidgetService extends Service implements Runnable {
         long end = now + searchDuration;
 
         Uri uri = Uri.withAppendedPath(Instances.CONTENT_URI,
-                String.format("%d/%d", now, end));
+                String.valueOf(now) + "/" + String.valueOf(end));
 
-        String selection = String.format("%s=1 AND %s!=%d",
-                Calendars.SELECTED, Instances.SELF_ATTENDEE_STATUS,
-                Attendees.ATTENDEE_STATUS_DECLINED);
+        String selection = Calendars.SELECTED + "=1 AND " + Instances.SELF_ATTENDEE_STATUS
+                + "!=" + Attendees.ATTENDEE_STATUS_DECLINED;
 
         return resolver.query(uri, EVENT_PROJECTION, selection, null,
                 EVENT_SORT_ORDER);
