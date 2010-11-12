@@ -39,6 +39,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -566,9 +567,9 @@ public class CalendarAppWidgetService extends Service implements Runnable {
         long end = now + searchDuration;
 
         Uri uri = Uri.withAppendedPath(Instances.CONTENT_URI,
-                String.format("%d/%d", now, end));
+                String.format((Locale)null, "%d/%d", now, end));
 
-        String selection = String.format("%s=1 AND %s!=%d",
+        String selection = String.format((Locale)null, "%s=1 AND %s!=%d",
                 Calendars.SELECTED, Instances.SELF_ATTENDEE_STATUS,
                 Attendees.ATTENDEE_STATUS_DECLINED);
 
