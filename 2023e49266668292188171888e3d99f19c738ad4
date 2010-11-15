@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9X///9g\u003d",
+        "filename": "src/com/android/providers/calendar/CalendarAppWidgetService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 570,
+      "author": {
+        "id": 1003224
+      },
+      "writtenOn": "2010-11-15T22:36:17Z",
+      "side": 1,
+      "message": "Locale.US is the preferred fix (because it\u0027s what null actually means).",
+      "revId": "2023e49266668292188171888e3d99f19c738ad4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
