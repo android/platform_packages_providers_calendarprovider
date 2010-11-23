@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAA9n///Es\u003d",
+        "filename": "src/com/android/providers/calendar/CalendarAppWidgetService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 570,
+      "author": {
+        "id": 1002598
+      },
+      "writtenOn": "2010-11-23T22:49:23Z",
+      "side": 1,
+      "message": "String.format() is really slow. Is there any problem with doing string concatenation? -\u003e Long.toString(begin) + \"/\" + end",
+      "revId": "d21e6a7d9befe80ad78f5de80503df21db812c56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///Eo\u003d",
+        "filename": "src/com/android/providers/calendar/CalendarAppWidgetService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 572,
+      "author": {
+        "id": 1002598
+      },
+      "writtenOn": "2010-11-23T22:49:23Z",
+      "side": 1,
+      "message": "In the internal master branch, someone have replaced this with a static final string i.e.\n    private static final String EVENT_SELECTION \u003d Calendars.SELECTED + \"\u003d1 AND \"\n            + Instances.SELF_ATTENDEE_STATUS + \"!\u003d\" + Attendees.ATTENDEE_STATUS_DECLINED;",
+      "revId": "d21e6a7d9befe80ad78f5de80503df21db812c56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
