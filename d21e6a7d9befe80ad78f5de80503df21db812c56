@@ -33,6 +33,23 @@
       "revId": "d21e6a7d9befe80ad78f5de80503df21db812c56",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAA9n///D4\u003d",
+        "filename": "src/com/android/providers/calendar/CalendarAppWidgetService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 576,
+      "author": {
+        "id": 1002598
+      },
+      "writtenOn": "2010-11-23T23:06:56Z",
+      "side": 1,
+      "message": "Generally, it is best to use the selectionArgs instead of doing string concatenation or String.format(). It\u0027s faster and you don\u0027t have to worry about escaping special characters, sql injection, etc. For some reason the Instance query just drops the selectionArgs. There\u0027s a bug open for that. See http://wangling.me/2009/08/whats-good-about-selectionargs-in-sqlite-queries/",
+      "revId": "d21e6a7d9befe80ad78f5de80503df21db812c56",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
