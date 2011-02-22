@@ -71,9 +71,11 @@ public class CalendarUpgradeReceiver extends BroadcastReceiver {
                 EventLogTags.writeCalendarUpgradeReceiver(System.currentTimeMillis() - startTime);
             }
         } catch (Throwable t) {
-            // Something has gone terribly wrong. Disable this receiver for good so we can't
-            // possibly end up in a reboot loop.
-            Log.wtf(TAG, "Error during upgrade attempt. Disabling receiver.", t);
+            // Something has gone terribly wrong.
+            Log.wtf(TAG, "Error during upgrade attempt.", t);
+        } finally {
+            // Ensure that it only ever get called once on first bootup.
+            Log.i(TAG, "Disable this receiver to avoid the upgrade at future reboots");
             context.getPackageManager().setComponentEnabledSetting(
                     new ComponentName(context, getClass()),
                     PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
