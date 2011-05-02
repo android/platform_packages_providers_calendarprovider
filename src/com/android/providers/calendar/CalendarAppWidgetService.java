@@ -334,7 +334,7 @@ public class CalendarAppWidgetService extends Service implements Runnable {
      */
     private long getEventFlip(Cursor cursor, long start, long end, boolean allDay) {
         long duration = end - start;
-        if (allDay || duration > DateUtils.DAY_IN_MILLIS) {
+        if (duration > DateUtils.DAY_IN_MILLIS) {
             return start;
         } else {
             return (start + end) / 2;
