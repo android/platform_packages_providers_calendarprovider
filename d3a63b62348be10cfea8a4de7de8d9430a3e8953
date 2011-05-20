@@ -1,0 +1,8 @@
+Change-Id: Id3a63b62348be10cfea8a4de7de8d9430a3e8953
+Code-Review+2: Jean-Baptiste Queru <jbq@google.com>
+Verified+1: Jean-Baptiste Queru <jbq@google.com>
+Submitted-by: Jean-Baptiste Queru <jbq@google.com>
+Submitted-at: Wed, 18 Mar 2009 13:59:49 -0700
+Reviewed-on: https://review.source.android.com/9199
+Project: platform/packages/providers/CalendarProvider
+Branch: refs/heads/master
