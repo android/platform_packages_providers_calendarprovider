@@ -41,6 +41,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
+// Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+import android.provider.CalendarContract;
+// End Motorola
+
 public class CalendarInstancesHelper {
     public static final class EventInstancesMap extends
             HashMap<String, CalendarInstancesHelper.InstancesList> {
@@ -69,7 +73,10 @@ public class CalendarInstancesHelper {
             + "(" + Events.ORIGINAL_INSTANCE_TIME + " IS NOT NULL AND "
                     + Events.ORIGINAL_INSTANCE_TIME
                     + " <= ? AND " + Events.ORIGINAL_INSTANCE_TIME + " >= ?)) AND "
-            + "(" + Calendars.SYNC_EVENTS + " != ?) AND "
+            // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+            + "(" + Calendars.SYNC_EVENTS + " != ? OR " + Calendars.ACCOUNT_TYPE + " = '"
+            + CalendarContract.ACCOUNT_TYPE_LOCAL + "') AND "
+            // End Motorola
             + "(" + Events.LAST_SYNCED + " = ?)";
 
     /**
@@ -592,7 +599,10 @@ public class CalendarInstancesHelper {
                 "0", // Calendars.SYNC_EVENTS
                 "0", // Events.LAST_SYNCED
         };
-        Cursor c = qb.query(mDb, EXPAND_COLUMNS, null /* selection */, selectionArgs,
+        // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+        final String selection = "hideFromUser" + "=0" + " OR " + "hideFromUser" + " IS NULL";
+        Cursor c = qb.query(mDb, EXPAND_COLUMNS, selection, selectionArgs,
+        // End Motorola
                 null /* groupBy */, null /* having */, null /* sortOrder */);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "Instance expansion:  got " + c.getCount() + " entries");

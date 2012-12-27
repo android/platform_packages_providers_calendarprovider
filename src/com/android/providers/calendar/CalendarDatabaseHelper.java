@@ -63,6 +63,14 @@ import java.util.TimeZone;
 
     private static final int DAY_IN_SECONDS = 24 * 60 * 60;
 
+    // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+    static final String LOCAL_CALENDAR_ACCOUNT_TYPE = CalendarContract.ACCOUNT_TYPE_LOCAL;
+    static final String LOCAL_CALENDAR_ACCOUNT_NAME = "local@phone";
+    static final String LOCAL_CALENDAR_NAME = "Phone Calendar";
+    static final String LOCAL_CALENDAR_DISPLAY_NAME = "Phone Calendar";
+    static final int LOCAL_CALENDAR_COLOR = 0xff2e8b57;
+    // End Motorola
+
     // Note: if you update the version number, you must also update the code
     // in upgradeDatabase() to modify the database (gracefully, if possible).
     //
@@ -74,7 +82,12 @@ import java.util.TimeZone;
     // 5xx for JB MR1
     // 6xx for K
     // Bump this to the next hundred at each major release.
-    static final int DATABASE_VERSION = 600;
+
+    // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+    static final int AOSP_DATABASE_VERSION = 600;
+    static final int MOTO_DATABASE_VERSION = 2;
+    static final int DATABASE_VERSION = (MOTO_DATABASE_VERSION<<16) + AOSP_DATABASE_VERSION;
+    // End Motorola
 
     private static final int PRE_FROYO_SYNC_STATE_VERSION = 3;
 
@@ -152,6 +165,9 @@ import java.util.TimeZone;
         public static final String SYNC_STATE = "_sync_state";
         public static final String SYNC_STATE_META = "_sync_state_metadata";
         public static final String COLORS = "Colors";
+        // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+        public static final String CALENDAR_ATTRIBUTES = "CalendarAttributes";
+        // End Motorola
     }
 
     public interface Views {
@@ -200,6 +216,14 @@ import java.util.TimeZone;
     private static final String CALENDAR_CLEANUP_TRIGGER_SQL = "DELETE FROM " + Tables.EVENTS +
             " WHERE " + CalendarContract.Events.CALENDAR_ID + "=" +
                 "old." + CalendarContract.Events._ID + ";";
+
+    // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+    private static final String CALENDAR_AND_ATTRIBUTES_CLEANUP_TRIGGER_SQL =
+        CALENDAR_CLEANUP_TRIGGER_SQL +
+            "DELETE FROM " + Tables.CALENDAR_ATTRIBUTES +
+                " WHERE " + "_id_calendar" + "=" +
+                    "old." + CalendarContract.Calendars._ID + ";";
+    // End Motorola
 
     private static final String CALENDAR_UPDATE_COLOR_TRIGGER_SQL = "UPDATE " + Tables.CALENDARS
             + " SET calendar_color=(SELECT " + Colors.COLOR + " FROM " + Tables.COLORS + " WHERE "
@@ -259,6 +283,9 @@ import java.util.TimeZone;
     private DatabaseUtils.InsertHelper mRemindersInserter;
     private DatabaseUtils.InsertHelper mCalendarAlertsInserter;
     private DatabaseUtils.InsertHelper mExtendedPropertiesInserter;
+    // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+    private DatabaseUtils.InsertHelper mCalendarAttributesInserter;
+    // End Motorola
 
     public long calendarsInsert(ContentValues values) {
         return mCalendarsInserter.insert(values);
@@ -304,6 +331,12 @@ import java.util.TimeZone;
         return mExtendedPropertiesInserter.insert(values);
     }
 
+    // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+    public long calendarAttributesInsert(ContentValues values) {
+        return mCalendarAttributesInserter.insert(values);
+    }
+    // End Motorola
+
     public static synchronized CalendarDatabaseHelper getInstance(Context context) {
         if (sSingleton == null) {
             sSingleton = new CalendarDatabaseHelper(context);
@@ -336,6 +369,10 @@ import java.util.TimeZone;
         mCalendarAlertsInserter = new DatabaseUtils.InsertHelper(db, Tables.CALENDAR_ALERTS);
         mExtendedPropertiesInserter =
                 new DatabaseUtils.InsertHelper(db, Tables.EXTENDED_PROPERTIES);
+        // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+        mCalendarAttributesInserter = new DatabaseUtils.InsertHelper(db, Tables.CALENDAR_ATTRIBUTES);
+        createLocalAccount(db);
+        // End Motorola
     }
 
     /*
@@ -493,6 +530,10 @@ import java.util.TimeZone;
                 + " (" +
                 CalendarContract.ExtendedProperties.EVENT_ID +
                 ");");
+
+        // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+        bootstrapMotoDB(db);
+        // End Motorola
 
         createEventsView(db);
 
@@ -1178,6 +1219,14 @@ import java.util.TimeZone;
         Log.i(TAG, "Upgrading DB from version " + oldVersion + " to " + newVersion);
         long startWhen = System.nanoTime();
 
+        // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+        // Beginning from Google's version 308, we introduce the Motorola version in Calendar DB.
+        // Motorola version is on the higher 16 bits of the version integer, and we keep Google
+        // version at the lower 16 bits.
+        int motoVersion = (oldVersion & 0xffff0000) >>> 16;
+        oldVersion = oldVersion & 0x0000ffff;
+        // End Motorola
+
         if (oldVersion < 49) {
             dropTables(db);
             bootstrapDB(db);
@@ -1413,15 +1462,37 @@ import java.util.TimeZone;
                 oldVersion = 600;
             }
 
+            // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+            if (motoVersion == 0) {
+                bootstrapMotoDB(db);
+                motoVersion = MOTO_DATABASE_VERSION;
+                createEventsView = true;
+            } else {
+                if (motoVersion == 1) {
+                    // Drop Conference Call tables
+                    db.execSQL("DROP TABLE IF EXISTS ConferenceCallInfo;");
+                    db.execSQL("DROP TRIGGER IF EXISTS events_cleanup_delete");
+                    db.execSQL("CREATE TRIGGER events_cleanup_delete DELETE ON " + Tables.EVENTS + " " +
+                            "BEGIN " + EVENTS_CLEANUP_TRIGGER_SQL + "END");
+                    motoVersion++;
+                }
+            }
+            // End Motorola
+
             if (createEventsView) {
                 createEventsView(db);
             }
-            if (oldVersion != DATABASE_VERSION) {
+            // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+            int currentVersion = (motoVersion << 16) + (oldVersion & 0x0000ffff);
+            if (currentVersion != DATABASE_VERSION) {
                 Log.e(TAG, "Need to recreate Calendar schema because of "
-                        + "unknown Calendar database version: " + oldVersion);
+                        + "unknown Calendar database version: " + currentVersion);
+                Log.e(TAG, "oldVersion was: " + oldVersion);
+                Log.e(TAG, "motoVersion was: " + motoVersion);
                 dropTables(db);
                 bootstrapDB(db);
-                oldVersion = DATABASE_VERSION;
+                currentVersion = DATABASE_VERSION;
+            // End Motorola
             } else {
                 removeOrphans(db);
             }
@@ -1432,6 +1503,7 @@ import java.util.TimeZone;
             }
             Log.e(TAG, "onUpgrade: SQLiteException, recreating db. ", e);
             Log.e(TAG, "(oldVersion was " + oldVersion + ")");
+            Log.e(TAG, "(motoVersion was " + motoVersion + ")");// Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
             dropTables(db);
             bootstrapDB(db);
             return; // this was lossy
@@ -3249,10 +3321,16 @@ import java.util.TimeZone;
                 + Calendars.OWNER_ACCOUNT + ","
                 + Calendars.SYNC_EVENTS  + ","
                 + "ifnull(" + Events.EVENT_COLOR + "," + Calendars.CALENDAR_COLOR + ") AS "
-                + Events.DISPLAY_COLOR
-                + " FROM " + Tables.EVENTS + " JOIN " + Tables.CALENDARS
+                // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                + Events.DISPLAY_COLOR + ","
+                + "hideFromUser"
+                + " FROM (" + Tables.EVENTS + " JOIN " + Tables.CALENDARS
                 + " ON (" + Tables.EVENTS + "." + Events.CALENDAR_ID
                 + "=" + Tables.CALENDARS + "." + Calendars._ID
+                + ")" + ") LEFT OUTER JOIN " + Tables.CALENDAR_ATTRIBUTES + " ON ("
+                + Tables.CALENDAR_ATTRIBUTES + "." + "_id_calendar"
+                + "=" + Tables.CALENDARS + "." + CalendarContract.Calendars._ID
+                // End Motorola
                 + ")";
 
         db.execSQL("CREATE VIEW " + Views.EVENTS + " AS " + eventsSelect);
@@ -3468,4 +3546,56 @@ import java.util.TimeZone;
           cursor.close();
         }
     }
+
+    // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+    private void createLocalAccount(SQLiteDatabase db) {
+        Cursor c = db.rawQuery("SELECT " + Calendars._ID
+                + " FROM Calendars WHERE "
+                + Calendars.ACCOUNT_TYPE + "=? AND " + Calendars.ACCOUNT_NAME + "=?",
+                new String[] { LOCAL_CALENDAR_ACCOUNT_TYPE, LOCAL_CALENDAR_ACCOUNT_NAME });
+        try {
+            if (c == null || c.getCount() == 0) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "------>  Created default local calendar.");
+                }
+                // Initialize the local calendar account.
+                ContentValues values = new ContentValues();
+                values.put(Calendars.ACCOUNT_NAME, LOCAL_CALENDAR_ACCOUNT_NAME);
+                values.put(Calendars.ACCOUNT_TYPE, LOCAL_CALENDAR_ACCOUNT_TYPE);
+                values.put(Calendars.NAME, LOCAL_CALENDAR_NAME);
+                values.put(Calendars.CALENDAR_DISPLAY_NAME, LOCAL_CALENDAR_DISPLAY_NAME);
+                values.put(Calendars.CALENDAR_COLOR, LOCAL_CALENDAR_COLOR);
+                values.put(Calendars.CALENDAR_ACCESS_LEVEL, Calendars.CAL_ACCESS_OWNER);
+                values.put(Calendars.VISIBLE, 1);
+                values.put(Calendars.SYNC_EVENTS, 0);
+                values.put(Calendars.CALENDAR_LOCATION, Time.getCurrentTimezone());
+                values.put(Calendars.CALENDAR_TIME_ZONE, Time.getCurrentTimezone());
+                values.put(Calendars.CAN_ORGANIZER_RESPOND, 0);
+                // Owner string, could be other string, identify the owner
+                values.put(Calendars.OWNER_ACCOUNT, LOCAL_CALENDAR_ACCOUNT_NAME);
+
+                mCalendarsInserter.insert(values);
+            }
+        } finally {
+            if (c != null) c.close();
+        }
+    }
+
+    private void bootstrapMotoDB(SQLiteDatabase db) {
+        // Calendar attributes table, will be used to join with Calendars table.
+        //   - hideFromUser Value 1 if user cannot see/select this calendar, 0 otherwise.
+        //   - use the id of calendar table as the primary key
+        db.execSQL("CREATE TABLE " + Tables.CALENDAR_ATTRIBUTES + " (" +
+                "_id_calendar" + " INTEGER PRIMARY KEY," +
+                "hideFromUser" + " INTEGER NOT NULL DEFAULT 0 CHECK(hideFromUser=1 OR hideFromUser=0)" +
+                ");");
+
+        // Trigger to remove a calendar's events and attributes when we delete the calendar
+        db.execSQL("DROP TRIGGER IF EXISTS calendar_cleanup");
+        db.execSQL("CREATE TRIGGER calendar_cleanup DELETE ON " + Tables.CALENDARS + " " +
+                "BEGIN " +
+                CALENDAR_AND_ATTRIBUTES_CLEANUP_TRIGGER_SQL +
+                "END");
+    }
+    // End Motorola
 }

@@ -81,6 +81,10 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+// Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+import java.util.UUID;
+// End Motorola
+
 /**
  * Calendar content provider. The contract between this provider and applications
  * is defined in {@link android.provider.CalendarContract}.
@@ -107,6 +111,9 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
             Events.RDATE,
             Events.ORIGINAL_ID,
             Events.ORIGINAL_SYNC_ID,
+            // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+            Events.CALENDAR_ID,
+            // End Motorola
     };
 
     private static final int EVENTS_SYNC_ID_INDEX = 0;
@@ -114,6 +121,9 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
     private static final int EVENTS_RDATE_INDEX = 2;
     private static final int EVENTS_ORIGINAL_ID_INDEX = 3;
     private static final int EVENTS_ORIGINAL_SYNC_ID_INDEX = 4;
+    // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+    private static final int EVENTS_CALENDAR_ID_INDEX = 5;
+    // End Motorola
 
     private static final String[] COLORS_PROJECTION = new String[] {
         Colors.ACCOUNT_NAME,
@@ -266,6 +276,14 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
     private static final String[] sCalendarsIdProjection = new String[] { Calendars._ID };
     private static final int CALENDARS_INDEX_ID = 0;
 
+    // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+    private static final String CALENDARS_QUERY_TABLES =
+        CalendarDatabaseHelper.Tables.CALENDARS + " LEFT OUTER JOIN " +
+        CalendarDatabaseHelper.Tables.CALENDAR_ATTRIBUTES +
+        " ON (" + CalendarDatabaseHelper.Tables.CALENDARS + "."
+        + CalendarContract.Calendars._ID + "=" + "_id_calendar" + ")";
+    // End Motorola
+
     private static final String INSTANCE_QUERY_TABLES =
         CalendarDatabaseHelper.Tables.INSTANCES + " INNER JOIN " +
         CalendarDatabaseHelper.Views.EVENTS + " AS " +
@@ -377,6 +395,10 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
         30 * DateUtils.SECOND_IN_MILLIS;
 
     private static final HashSet<String> ALLOWED_URI_PARAMETERS = Sets.newHashSet(
+            // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+            "use_hidden_calendar",
+            "hide_from_user",
+            // End Motorola
             CalendarContract.CALLER_IS_SYNCADAPTER,
             CalendarContract.EventsEntity.ACCOUNT_NAME,
             CalendarContract.EventsEntity.ACCOUNT_TYPE);
@@ -855,6 +877,11 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
         String limit = null; // Not currently implemented
         String instancesTimezone;
 
+        // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+        final boolean useHiddenCalendar =
+        QueryParameterUtils.readBooleanQueryParameter(uri, "use_hidden_calendar", false);
+        // End Motorola
+
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case SYNCSTATE:
@@ -872,6 +899,9 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
             case EVENTS:
                 qb.setTables(CalendarDatabaseHelper.Views.EVENTS);
                 qb.setProjectionMap(sEventsProjectionMap);
+                // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                appendHideFromUserToWhere(qb, useHiddenCalendar);
+                // End Motorola
                 selection = appendAccountToSelection(uri, selection, Calendars.ACCOUNT_NAME,
                         Calendars.ACCOUNT_TYPE);
                 selection = appendLastSyncedColumnToSelection(selection, uri);
@@ -886,6 +916,9 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
             case EVENT_ENTITIES:
                 qb.setTables(CalendarDatabaseHelper.Views.EVENTS);
                 qb.setProjectionMap(sEventEntitiesProjectionMap);
+                // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                appendHideFromUserToWhere(qb, useHiddenCalendar);
+                // End Motorola
                 selection = appendAccountToSelection(uri, selection, Calendars.ACCOUNT_NAME,
                         Calendars.ACCOUNT_TYPE);
                 selection = appendLastSyncedColumnToSelection(selection, uri);
@@ -906,7 +939,10 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
 
             case CALENDARS:
             case CALENDAR_ENTITIES:
-                qb.setTables(Tables.CALENDARS);
+                // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                qb.setTables(CALENDARS_QUERY_TABLES);
+                appendHideFromUserToWhere(qb, useHiddenCalendar);
+                // End Motorola
                 qb.setProjectionMap(sCalendarsProjectionMap);
                 selection = appendAccountToSelection(uri, selection, Calendars.ACCOUNT_NAME,
                         Calendars.ACCOUNT_TYPE);
@@ -977,9 +1013,14 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
                 return handleEventDayQuery(qb, startDay, endDay, projection, selection,
                         instancesTimezone, isHomeTimezone());
             case ATTENDEES:
-                qb.setTables(Tables.ATTENDEES + ", " + Tables.EVENTS + ", " + Tables.CALENDARS);
+                // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                qb.setTables(Tables.ATTENDEES + ", " + Tables.EVENTS + ", " + CALENDARS_QUERY_TABLES);
+                // End Motorola
                 qb.setProjectionMap(sAttendeesProjectionMap);
                 qb.appendWhere(SQL_WHERE_ATTENDEE_BASE);
+                // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                appendHideFromUserToWhere2(qb, useHiddenCalendar);
+                // End Motorola
                 break;
             case ATTENDEES_ID:
                 qb.setTables(Tables.ATTENDEES + ", " + Tables.EVENTS + ", " + Tables.CALENDARS);
@@ -2114,6 +2155,11 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
         verifyTransactionAllowed(TRANSACTION_INSERT, uri, values, callerIsSyncAdapter, match,
                 null /* selection */, null /* selection args */);
 
+        // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+        final boolean hideFromUser =
+        QueryParameterUtils.readBooleanQueryParameter(uri, "hide_from_user", false);
+        // End Motorola
+
         long id = 0;
 
         switch (match) {
@@ -2159,15 +2205,19 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
                     throw new IllegalArgumentException("New events must specify a calendar id");
                 }
                 // Verify the color is valid if it is being set
+                // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                Account calAccount = getAccount(calendar_id);
+                // End Motorola
                 String color_id = updatedValues.getAsString(Events.EVENT_COLOR_KEY);
                 if (!TextUtils.isEmpty(color_id)) {
-                    Account account = getAccount(calendar_id);
                     String accountName = null;
                     String accountType = null;
-                    if (account != null) {
-                        accountName = account.name;
-                        accountType = account.type;
+                    // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                    if (calAccount != null) {
+                        accountName = calAccount.name;
+                        accountType = calAccount.type;
                     }
+                    // End Motorola
                     int color = verifyColorExists(accountName, accountType, color_id,
                             Colors.TYPE_EVENT);
                     updatedValues.put(Events.EVENT_COLOR, color);
@@ -2183,6 +2233,20 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
                         updatedValues.put(Events.ORGANIZER, owner);
                     }
                 }
+                // Being Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                // Generate _sync_id for local calendar event
+                if (calAccount != null
+                        && CalendarDatabaseHelper.LOCAL_CALENDAR_ACCOUNT_TYPE.equals(calAccount.type)
+                        && CalendarDatabaseHelper.LOCAL_CALENDAR_ACCOUNT_NAME.equals(calAccount.name)) {
+                    // Exception events should have put _SYNC_ID by concatenate
+                    // original event's _SYNC_ID and the exception's time,
+                    //   e.g. local://abcd-1234-abcd-xyz_201203120000Z
+                    if (!updatedValues.containsKey(Events._SYNC_ID)) {
+                        updatedValues.put(Events._SYNC_ID, "local://"
+                                + UUID.randomUUID().toString());
+                    }
+                }
+                // End Motorola
                 if (updatedValues.containsKey(Events.ORIGINAL_SYNC_ID)
                         && !updatedValues.containsKey(Events.ORIGINAL_ID)) {
                     long originalId = getOriginalId(updatedValues
@@ -2252,6 +2316,14 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
                     values.put(Calendars.CALENDAR_COLOR, color);
                 }
                 id = mDbHelper.calendarsInsert(values);
+                // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                if (hideFromUser && id != -1L) {
+                    ContentValues calAttrValues = new ContentValues();
+                    calAttrValues.put("_id_calendar", id);
+                    calAttrValues.put("hideFromUser", 1);
+                    mDbHelper.calendarAttributesInsert(calAttrValues);
+                }
+                // End Motorola
                 sendUpdateNotification(id, callerIsSyncAdapter);
                 break;
             case COLORS:
@@ -2632,9 +2704,13 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
         long originalId = -1;
         Cursor c = null;
         try {
-            c = query(Events.CONTENT_URI, ID_ONLY_PROJECTION,
-                    Events._SYNC_ID + "=?"  + " AND " + Events.CALENDAR_ID + "=?",
-                    new String[] {originalSyncId, calendarId}, null);
+            // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+            // Use raw query here, or we'll have problems for iCalendar since it's invisible.
+            c = mDb.rawQuery("SELECT " + Events._ID +
+                    " FROM " + Tables.EVENTS +
+                    " WHERE " + Events._SYNC_ID + "=? AND " + Events.CALENDAR_ID + "=?",
+                    new String[] {originalSyncId, calendarId});
+            // End Motorola
             if (c != null && c.moveToFirst()) {
                 originalId = c.getLong(0);
             }
@@ -2654,8 +2730,12 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
         String originalSyncId = null;
         Cursor c = null;
         try {
-            c = query(Events.CONTENT_URI, new String[] {Events._SYNC_ID},
-                    Events._ID + "=?", new String[] {Long.toString(originalId)}, null);
+            // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+            // Use raw query here, or we'll have problems for iCalendar since it's invisible.
+            c = mDb.rawQuery("SELECT " + Events._SYNC_ID +
+                    " FROM " + Tables.EVENTS +
+                    " WHERE " + Events._ID + " = " + Long.toString(originalId), null);
+            // End Motorola
             if (c != null && c.moveToFirst()) {
                 originalSyncId = c.getString(0);
             }
@@ -2691,11 +2771,12 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
         String emailAddress = null;
         Cursor cursor = null;
         try {
-            cursor = query(ContentUris.withAppendedId(Calendars.CONTENT_URI, calId),
-                    new String[] { Calendars.OWNER_ACCOUNT },
-                    null /* selection */,
-                    null /* selectionArgs */,
-                    null /* sort */);
+            // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+            // Use raw query here, or we'll have problems for iCalendar since it's invisible.
+            cursor = mDb.rawQuery("SELECT " + Calendars.OWNER_ACCOUNT +
+                    " FROM " + Tables.CALENDARS +
+                    " WHERE " + Calendars._ID + " = " + Long.toString(calId), null);
+            // End Motorola
             if (cursor == null || !cursor.moveToFirst()) {
                 if (Log.isLoggable(TAG, Log.DEBUG)) {
                     Log.d(TAG, "Couldn't find " + calId + " in Calendars table");
@@ -2780,11 +2861,12 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
             Cursor cursor = null;
             long calId;
             try {
-                cursor = query(ContentUris.withAppendedId(Events.CONTENT_URI, eventId),
-                        new String[] { Events.CALENDAR_ID },
-                        null /* selection */,
-                        null /* selectionArgs */,
-                        null /* sort */);
+                // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                // Use raw query here, or we'll have problems for iCalendar since it's invisible.
+                cursor = db.rawQuery("SELECT " + Events.CALENDAR_ID +
+                        " FROM " + Tables.EVENTS +
+                        " WHERE " + Events._ID + " = " + Long.toString(eventId), null);
+                // End Motorola
                 if (cursor == null || !cursor.moveToFirst()) {
                     if (Log.isLoggable(TAG, Log.DEBUG)) {
                         Log.d(TAG, "Couldn't find " + eventId + " in Events table");
@@ -2802,11 +2884,12 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
             String calendarEmail = null;
             cursor = null;
             try {
-                cursor = query(ContentUris.withAppendedId(Calendars.CONTENT_URI, calId),
-                        new String[] { Calendars.OWNER_ACCOUNT },
-                        null /* selection */,
-                        null /* selectionArgs */,
-                        null /* sort */);
+                // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                // Use raw query here, or we'll have problems for iCalendar since it's invisible.
+                cursor = db.rawQuery("SELECT " + Calendars.OWNER_ACCOUNT +
+                        " FROM " + Tables.CALENDARS +
+                        " WHERE " + Calendars._ID + " = " + Long.toString(calId), null);
+                // End Motorola
                 if (cursor == null || !cursor.moveToFirst()) {
                     if (Log.isLoggable(TAG, Log.DEBUG)) {
                         Log.d(TAG, "Couldn't find " + calId + " in Calendars table");
@@ -2912,7 +2995,9 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
         // duration during event processing, so this situation should not
         // occur.
         Long dtEnd = values.getAsLong(Events.DTEND);
-        if (dtEnd != null) {
+        // Being Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+        if ((dtEnd != null) && (dtEnd > dtstartMillis)) {
+        // End Motorola
             lastMillis = dtEnd;
         } else {
             // find out how long it is
@@ -3236,19 +3321,34 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
                 }
                 boolean isRecurrence = !TextUtils.isEmpty(rrule) || !TextUtils.isEmpty(rdate);
 
+                // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                boolean isLocalAccount = false;
+                long calId = cursor.getLong(EVENTS_CALENDAR_ID_INDEX);
+                Account account = getAccount(calId);
+                if (account != null
+                    && CalendarDatabaseHelper.LOCAL_CALENDAR_ACCOUNT_TYPE.equals(account.type)
+                    && CalendarDatabaseHelper.LOCAL_CALENDAR_ACCOUNT_NAME.equals(account.name)) {
+                    isLocalAccount = true;
+                }
+                // End Motorola
+
                 // we clean the Events and Attendees table if the caller is CalendarSyncAdapter
                 // or if the event is local (no syncId)
                 //
                 // The EVENTS_CLEANUP_TRIGGER_SQL trigger will remove all associated data
                 // (Attendees, Instances, Reminders, etc).
-                if (callerIsSyncAdapter || emptySyncId) {
+                // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                if (callerIsSyncAdapter || emptySyncId || isLocalAccount) {
+                // End Motorola
                     mDb.delete(Tables.EVENTS, SQL_WHERE_ID, selectionArgs);
 
                     // If this is a recurrence, and the event was never synced with the server,
                     // we want to delete any exceptions as well.  (If it has been to the server,
                     // we'll let the sync adapter delete the events explicitly.)  We assume that,
                     // if the recurrence hasn't been synced, the exceptions haven't either.
-                    if (isRecurrence && emptySyncId) {
+                    // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                    if (isRecurrence && (emptySyncId || isLocalAccount)) {
+                    // End Motorola
                         mDb.delete(Tables.EVENTS, SQL_WHERE_ORIGINAL_ID, selectionArgs);
                     }
                 } else {
@@ -4100,6 +4200,11 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
                 return count;
             }
 
+            // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+            case EXTENDED_PROPERTIES: {
+                return mDb.update(Tables.EXTENDED_PROPERTIES, values, selection, selectionArgs);
+            }
+            // End Motorola
             case EXTENDED_PROPERTIES_ID:
                 return updateEventRelatedTable(uri, Tables.EXTENDED_PROPERTIES, true, values,
                         null, null, callerIsSyncAdapter);
@@ -5013,10 +5118,18 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
                     // with a system account. Typically, a calendar must be
                     // associated with an account on the device or it will be
                     // deleted.
+                    //
+                    // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+                    // LOCAL_CALENDAR_ACCOUNT_TYPE is a calendar that only on local storage,
+                    // though it's now the same as ACCOUNT_TYPE_LOCAL, we still list the
+                    // condition below in case this type is changed (different).
                     if (c.getString(0) != null
                             && c.getString(1) != null
                             && !TextUtils.equals(c.getString(1),
-                                    CalendarContract.ACCOUNT_TYPE_LOCAL)) {
+                                    CalendarContract.ACCOUNT_TYPE_LOCAL)
+                            && !TextUtils.equals(c.getString(1),
+                                    CalendarDatabaseHelper.LOCAL_CALENDAR_ACCOUNT_TYPE)) {
+                    // End Motorola
                         Account currAccount = new Account(c.getString(0), c.getString(1));
                         if (!validAccounts.contains(currAccount)) {
                             accountsToDelete.add(currAccount);
@@ -5092,4 +5205,23 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
             values.put(columnName, mutators + "," + packageName);
         }
     }
+
+    // Begin Motorola, IKJB42MAIN-55 / Porting iCal feature for FEATURE-3247
+    /** Append hideFromUser parameter to WHERE clause. */
+    private void appendHideFromUserToWhere(SQLiteQueryBuilder qb, boolean useHiddenCalendar) {
+        appendHideFromUserToWhereAnd(qb, useHiddenCalendar, false);
+    }
+
+    /** Append hideFromUser parameter to WHERE clause after an AND. */
+    private void appendHideFromUserToWhere2(SQLiteQueryBuilder qb, boolean useHiddenCalendar) {
+        appendHideFromUserToWhereAnd(qb, useHiddenCalendar, true);
+    }
+
+    private void appendHideFromUserToWhereAnd(SQLiteQueryBuilder qb, boolean useHiddenCalendar, boolean and) {
+        if (!useHiddenCalendar) {
+            if (and) qb.appendWhere(" AND ");
+            qb.appendWhere("(" + "hideFromUser" + "=0 OR " + "hideFromUser" + " IS NULL" + ")");
+        }
+    }
+    // End Motorola
 }
