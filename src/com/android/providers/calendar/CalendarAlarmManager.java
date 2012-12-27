@@ -338,6 +338,9 @@ public class CalendarAlarmManager {
                 + Instances.EVENT_ID + ")" + " INNER JOIN " + Tables.REMINDERS + " ON ("
                 + Tables.INSTANCES + "." + Instances.EVENT_ID + "=" + Tables.REMINDERS + "."
                 + Reminders.EVENT_ID + ")" + " WHERE " + Calendars.VISIBLE + "=1"
+                // Begin iCal feature
+                + " AND (" + "hideFromUser" + "=0 OR " + "hideFromUser" + " IS NULL)"
+                // End iCal feature
                 + " AND myAlarmTime>=CAST(? AS INT)" + " AND myAlarmTime<=CAST(? AS INT)" + " AND "
                 + Instances.END + ">=?" + " AND " + Reminders.METHOD + "=" + Reminders.METHOD_ALERT;
 
