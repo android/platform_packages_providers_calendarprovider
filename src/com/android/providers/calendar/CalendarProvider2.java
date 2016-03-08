@@ -5055,7 +5055,9 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
         }
 
         // make sure the widget reflects the account changes
-        sendUpdateNotification(false);
+        if (accountsToDelete.size() > 0) {
+            sendUpdateNotification(false);
+        }
     }
 
     /**
