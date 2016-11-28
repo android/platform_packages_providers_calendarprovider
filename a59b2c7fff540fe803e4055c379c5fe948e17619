@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b04b9845_150116e6",
+        "filename": "src/com/android/providers/calendar/CalendarProvider2.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 5050,
+      "author": {
+        "id": 1061218
+      },
+      "writtenOn": "2016-11-28T16:56:56Z",
+      "side": 1,
+      "message": "Maybe we should also put this in the if accountsToDelete case as it looks unnecessary too.",
+      "revId": "a59b2c7fff540fe803e4055c379c5fe948e17619",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
