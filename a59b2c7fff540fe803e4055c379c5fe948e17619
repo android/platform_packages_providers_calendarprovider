@@ -16,6 +16,24 @@
       "revId": "a59b2c7fff540fe803e4055c379c5fe948e17619",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d367b0e_617f96ca",
+        "filename": "src/com/android/providers/calendar/CalendarProvider2.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 5050,
+      "author": {
+        "id": 1010077
+      },
+      "writtenOn": "2016-12-01T11:12:40Z",
+      "side": 1,
+      "message": "Don\u0027t think so. Maybe not too realistic, but it\u0027s theoretically possible that sync table is out of sync with either calendars or the colors table so accountsToDelete would be empty while there are still items to update/delete in the sync table. \n\nAnd also in Snild\u0027s words:\"I don’t think onAccountsChanged() will be expensive enough to care about; we’re already in a transaction (so no extra locking/flush overheads) and the SELECT in there will not yield many rows (sync table has a UNIQUE index on accountname+accounttype, and users will hopefully not have thousands of accounts). And if no accounts were deleted (and things were in sync), the deletes won’t even happen.\"",
+      "parentUuid": "b04b9845_150116e6",
+      "revId": "a59b2c7fff540fe803e4055c379c5fe948e17619",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
