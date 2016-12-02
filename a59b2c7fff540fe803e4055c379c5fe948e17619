@@ -34,6 +34,29 @@
       "revId": "a59b2c7fff540fe803e4055c379c5fe948e17619",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b04b9845_359d3a54",
+        "filename": "src/com/android/providers/calendar/CalendarProvider2.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 5060,
+      "author": {
+        "id": 1049478
+      },
+      "writtenOn": "2016-12-02T10:33:55Z",
+      "side": 1,
+      "message": "Nit: Use !accountsToDelete.isEmpty() instead.",
+      "range": {
+        "startLine": 5060,
+        "startChar": 12,
+        "endLine": 5060,
+        "endChar": 39
+      },
+      "revId": "a59b2c7fff540fe803e4055c379c5fe948e17619",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
