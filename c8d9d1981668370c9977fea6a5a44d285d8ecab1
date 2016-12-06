@@ -1,0 +1,9 @@
+Verified+1: rickywai <rickywai@google.com>
+Code-Review+1: Christoph Studer <chstuder@google.com>
+Code-Review+2: rickywai <rickywai@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: rickywai <rickywai@google.com>
+Submitted-at: Tue, 06 Dec 2016 14:35:14 +0000
+Reviewed-on: https://android-review.googlesource.com/212153
+Project: platform/packages/providers/CalendarProvider
+Branch: refs/heads/master
