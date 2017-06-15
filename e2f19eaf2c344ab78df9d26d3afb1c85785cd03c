@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f71bd60b_18cd4a22",
+        "filename": "OWNERS",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1029223
+      },
+      "writtenOn": "2017-06-15T12:44:45Z",
+      "side": 1,
+      "message": "I don\u0027t think I should be an owner of this project. I only modified it for build rules (1 CL for code coverage: https://android-review.googlesource.com/214820), not for the code itself.\n\nDoes your request only take CLs made in AOSP into account ?",
+      "range": {
+        "startLine": 2,
+        "startChar": 0,
+        "endLine": 2,
+        "endChar": 17
+      },
+      "revId": "e2f19eaf2c344ab78df9d26d3afb1c85785cd03c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
