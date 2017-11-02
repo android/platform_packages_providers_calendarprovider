@@ -63,16 +63,6 @@ public class CalendarAlarmManager {
     /* package */static final Uri SCHEDULE_ALARM_URI = Uri.withAppendedPath(
             CalendarContract.CONTENT_URI, SCHEDULE_ALARM_PATH);
 
-    /**
-     * If no alarms are scheduled in the next 24h, check for future alarms again after this period
-     * has passed. Scheduling the check 15 minutes earlier than 24h to prevent the scheduler alarm
-     * from using up the alarms quota for reminders during dozing.
-     *
-     * @see AlarmManager#setExactAndAllowWhileIdle
-     */
-    private static final long ALARM_CHECK_WHEN_NO_ALARM_IS_SCHEDULED_INTERVAL_MILLIS =
-            DateUtils.DAY_IN_MILLIS - (15 * DateUtils.MINUTE_IN_MILLIS);
-
     static final String INVALID_CALENDARALERTS_SELECTOR =
     "_id IN (SELECT ca." + CalendarAlerts._ID + " FROM "
             + Tables.CALENDAR_ALERTS + " AS ca"
@@ -121,6 +111,13 @@ public class CalendarAlarmManager {
      */
     @VisibleForTesting
     protected AtomicBoolean mNextAlarmCheckScheduled;
+    /**
+     * Used for tracking if an alarm has been scheduled in
+     * scheduleAlarm(). If none has, we should schedule a new check
+     * for upcoming alarms at the end of scheduleNextAlarmLocked().
+     */
+    @VisibleForTesting
+    protected boolean mAlarmScheduled;
     /**
      * Used for synchronization
      */
@@ -278,7 +275,9 @@ public class CalendarAlarmManager {
 
         final long currentMillis = System.currentTimeMillis();
         final long start = currentMillis - SCHEDULE_ALARM_SLACK;
-        final long end = start + (24 * 60 * 60 * 1000);
+        final long end = currentMillis + DateUtils.DAY_IN_MILLIS;
+        mAlarmScheduled = false;
+
         if (Log.isLoggable(CalendarProvider2.TAG, Log.DEBUG)) {
             time.set(start);
             String startTimeStr = time.format(" %a, %b %d, %Y %I:%M%P");
@@ -471,12 +470,24 @@ public class CalendarAlarmManager {
             scheduleAlarm(currentMillis);
         }
 
-        // No event alarm is scheduled, check again in 24 hours. If a new
-        // event is inserted before the next alarm check, then this method
-        // will be run again when the new event is inserted.
-        if (nextAlarmTime == Long.MAX_VALUE) {
-            scheduleNextAlarmCheck(
-                    currentMillis + ALARM_CHECK_WHEN_NO_ALARM_IS_SCHEDULED_INTERVAL_MILLIS);
+        // No event alarm is scheduled, check again in 24 hours - 15
+        // minutes. Scheduling the check 15 minutes earlier than 24
+        // hours to prevent the scheduler alarm from using up the
+        // alarms quota for reminders during dozing. If a new event is
+        // inserted before the next alarm check, then this method will
+        // be run again when the new event is inserted.
+        if (!mAlarmScheduled) {
+            long offset = end - currentMillis;
+            long checkTime;
+            if (offset < 0) {
+                Log.wtf(CalendarProvider2.TAG, "End time is in the past.");
+                return;
+            } else if (offset <= (15 * DateUtils.MINUTE_IN_MILLIS)) {
+                checkTime = end;
+            } else {
+                checkTime = end - (15 * DateUtils.MINUTE_IN_MILLIS);
+            }
+            scheduleNextAlarmCheck(checkTime);
         }
     }
 
@@ -516,12 +527,17 @@ public class CalendarAlarmManager {
         mAlarmManager.cancel(operation);
     }
 
+    /**
+     * Only run inside scheduleNextAlarmLocked, please!
+     * mAlarmScheduled is specific to that method, currently.
+     */
     public void scheduleAlarm(long alarmTime) {
         // Debug log for investigating dozing related bugs, remove it once we confirm it is stable.
         if (Build.IS_DEBUGGABLE) {
             Log.d(TAG, "schedule reminder alarm fired at " + alarmTime);
         }
         CalendarContract.CalendarAlerts.scheduleAlarm(mContext, mAlarmManager, alarmTime);
+        mAlarmScheduled = true;
     }
 
     public void rescheduleMissedAlarms(ContentResolver cr) {
