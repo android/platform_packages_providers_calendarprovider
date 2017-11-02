@@ -278,7 +278,7 @@ public class CalendarAlarmManager {
 
         final long currentMillis = System.currentTimeMillis();
         final long start = currentMillis - SCHEDULE_ALARM_SLACK;
-        final long end = start + (24 * 60 * 60 * 1000);
+        final long end = currentMillis + (24 * 60 * 60 * 1000);
         if (Log.isLoggable(CalendarProvider2.TAG, Log.DEBUG)) {
             time.set(start);
             String startTimeStr = time.format(" %a, %b %d, %Y %I:%M%P");
@@ -474,7 +474,7 @@ public class CalendarAlarmManager {
         // No event alarm is scheduled, check again in 24 hours. If a new
         // event is inserted before the next alarm check, then this method
         // will be run again when the new event is inserted.
-        if (nextAlarmTime == Long.MAX_VALUE) {
+        if (nextAlarmTime == end) {
             scheduleNextAlarmCheck(
                     currentMillis + ALARM_CHECK_WHEN_NO_ALARM_IS_SCHEDULED_INTERVAL_MILLIS);
         }
