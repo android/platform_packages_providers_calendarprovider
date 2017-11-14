@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fa9fe30c_7ecc419d",
+        "filename": "src/com/android/providers/calendar/CalendarAlarmManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1245326
+      },
+      "writtenOn": "2017-11-14T10:54:16Z",
+      "side": 1,
+      "message": "Indeed, I agree that it\u0027s not really optimal. I figured I would try to keep the changes as small as possible to increase the chance of getting them merged, ironically.\n\nUnless I\u0027m mistaken this should work even if the event is scheduled at end, since the function would run again at that time and find the event (since it looks two hours back).",
+      "parentUuid": "c180ab4c_1a8d06f2",
+      "revId": "e41183b7671016c1bd4cf130a5c111b0fe6a7e0b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d34dd50d_4dc323cf",
         "filename": "src/com/android/providers/calendar/CalendarAlarmManager.java",
         "patchSetId": 1
@@ -33,6 +51,24 @@
       "revId": "e41183b7671016c1bd4cf130a5c111b0fe6a7e0b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "861a307c_73c852cc",
+        "filename": "src/com/android/providers/calendar/CalendarAlarmManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 1245326
+      },
+      "writtenOn": "2017-11-14T10:54:16Z",
+      "side": 1,
+      "message": "This was my idea too at the beginning, but then I felt like maybe it deviated too much from the original. I\u0027ll look into it; I guess we\u0027ll need some safeguarding for values of end less than 15 mins too, even though it\u0027s unlikely to be used in real world scenarios.",
+      "parentUuid": "d34dd50d_4dc323cf",
+      "revId": "e41183b7671016c1bd4cf130a5c111b0fe6a7e0b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
