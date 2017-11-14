@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c180ab4c_1a8d06f2",
+        "filename": "src/com/android/providers/calendar/CalendarAlarmManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1060841
+      },
+      "writtenOn": "2017-11-14T00:40:41Z",
+      "side": 1,
+      "message": "Hmm, using \"end\" means \"no event alarm\" is scheduled sounds weird to me. What if the event is indeed scheduled at \"end\"? Also, there could be much more cases that scheduleAlarm(alarmTime)\" is not run?\n\nFeel like we should introduce a boolean to track whether \"scheduleAlarm(alarmTime)\" is indeed run.",
+      "revId": "e41183b7671016c1bd4cf130a5c111b0fe6a7e0b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d34dd50d_4dc323cf",
+        "filename": "src/com/android/providers/calendar/CalendarAlarmManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 1060841
+      },
+      "writtenOn": "2017-11-14T00:40:41Z",
+      "side": 1,
+      "message": "My understanding is, this function finds alarm from variable start to end. If we didn\u0027t find any alarm within the period, we would want to schedule the next check at 15 minutes before variable end.\n\nSo instead of changing the end variable above, I think we should update here to be scheduleNextAlarmCheck(end - 15 mins), so it works no matter what the value of variable end is.",
+      "revId": "e41183b7671016c1bd4cf130a5c111b0fe6a7e0b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
