@@ -16,6 +16,24 @@
       "revId": "e1542e34654b0062084a4cdcf63b8058d4b688ac",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ea79e73_728a5c50",
+        "filename": "src/com/android/providers/calendar/CalendarAlarmManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1245326
+      },
+      "writtenOn": "2017-12-12T21:57:17Z",
+      "side": 1,
+      "message": "Yes, it should be. The idea behind this was to be flexible about the end time and calculate the offset from it, both to allow easier testing and guard from future changes of end. Might be overly cautious, though. :)",
+      "parentUuid": "f276bf72_b0db576a",
+      "revId": "e1542e34654b0062084a4cdcf63b8058d4b688ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
