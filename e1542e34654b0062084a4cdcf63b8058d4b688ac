@@ -34,6 +34,24 @@
       "revId": "e1542e34654b0062084a4cdcf63b8058d4b688ac",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a61151e9_ad9ce91c",
+        "filename": "src/com/android/providers/calendar/CalendarAlarmManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1003801
+      },
+      "writtenOn": "2017-12-12T22:06:14Z",
+      "side": 1,
+      "message": "Okay, thanks for the reply; let\u0027s keep it simple then. :)",
+      "parentUuid": "1ea79e73_728a5c50",
+      "revId": "e1542e34654b0062084a4cdcf63b8058d4b688ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
