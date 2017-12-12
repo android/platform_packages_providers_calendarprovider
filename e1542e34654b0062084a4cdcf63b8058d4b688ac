@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f276bf72_b0db576a",
+        "filename": "src/com/android/providers/calendar/CalendarAlarmManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1003801
+      },
+      "writtenOn": "2017-12-12T20:13:11Z",
+      "side": 1,
+      "message": "\"end-currentMillis\" is now constant, right? Did you mean to change it to something else?",
+      "revId": "e1542e34654b0062084a4cdcf63b8058d4b688ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
