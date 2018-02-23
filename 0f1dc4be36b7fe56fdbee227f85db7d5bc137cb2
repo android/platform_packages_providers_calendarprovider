@@ -1,0 +1,9 @@
+Verified+1: hansson <hansson@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+2: Narayan Kamath <narayan@google.com>
+Code-Review+2: Makoto Onuki <omakoto@google.com>
+Submitted-by: hansson <hansson@google.com>
+Submitted-at: Fri, 23 Feb 2018 07:16:50 +0000
+Reviewed-on: https://android-review.googlesource.com/624549
+Project: platform/packages/providers/CalendarProvider
+Branch: refs/heads/master
