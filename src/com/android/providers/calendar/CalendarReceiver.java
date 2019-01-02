@@ -23,7 +23,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.PowerManager;
-import android.os.SystemProperties;
+import android.sysprop.CalendarProperties;
 import android.util.Log;
 
 import java.util.concurrent.TimeUnit;
@@ -39,7 +39,7 @@ public class CalendarReceiver extends BroadcastReceiver {
     private static final String TAG = CalendarProvider2.TAG;
 
     private static final long NEXT_EVENT_CHECK_INTERVAL =
-            SystemProperties.getLong("debug.calendar.check_interval", TimeUnit.HOURS.toMillis(6));
+            CalendarProperties.check_interval().orElse(TimeUnit.HOURS.toMillis(6));
     private static final int NEXT_EVENT_CHECK_PENDING_CODE = 100;
 
     private PowerManager.WakeLock mWakeLock;
