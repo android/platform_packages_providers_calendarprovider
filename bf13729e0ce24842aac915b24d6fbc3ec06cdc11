@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "585dbba1_6587b603",
+        "filename": "Android.bp",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1074628
+      },
+      "writtenOn": "2019-01-09T00:40:45Z",
+      "side": 1,
+      "message": "Our preferred format here is to merge these into a single list, which will format it as a multiline list:\n\n  srcs: [\n      \"src/**/*.java\",\n      \"src/com/android/providers/calendar/EventLogTags.logtags\",\n  ],\n\nI\u0027m not sure if there\u0027s something we can easily do in androidmk or bpfix in order to automatically handle this.",
+      "range": {
+        "startLine": 24,
+        "startChar": 26,
+        "endLine": 24,
+        "endChar": 31
+      },
+      "revId": "bf13729e0ce24842aac915b24d6fbc3ec06cdc11",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
