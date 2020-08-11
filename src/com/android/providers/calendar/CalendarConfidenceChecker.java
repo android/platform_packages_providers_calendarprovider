@@ -37,10 +37,10 @@ import com.android.internal.annotations.VisibleForTesting;
  * We call {@link #checkLastCheckTime} at the provider public entry points to make sure
  * {@link CalendarAlarmManager#scheduleNextAlarmLocked} has been called recently enough.
  *
- * atest tests/src/com/android/providers/calendar/CalendarSanityCheckerTest.java
+ * atest tests/src/com/android/providers/calendar/CalendarConfidenceCheckerTest.java
  */
-public class CalendarSanityChecker {
-    private static final String TAG = "CalendarSanityChecker";
+public class CalendarConfidenceChecker {
+    private static final String TAG = "CalendarConfidenceChecker";
 
     private static final boolean DEBUG = false;
 
@@ -64,7 +64,7 @@ public class CalendarSanityChecker {
     private static final String LAST_CHECK_BOOT_COUNT_PREF_KEY = "last_check_boot_count";
     private static final String LAST_WTF_REALTIME_PREF_KEY = "last_wtf_realtime";
 
-    private static CalendarSanityChecker sInstance;
+    private static CalendarConfidenceChecker sInstance;
     private final Context mContext;
 
     private final Object mLock = new Object();
@@ -73,7 +73,7 @@ public class CalendarSanityChecker {
     @VisibleForTesting
     final SharedPreferences mPrefs;
 
-    protected CalendarSanityChecker(Context context) {
+    protected CalendarConfidenceChecker(Context context) {
         mContext = context;
         mPrefs = mContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
@@ -99,9 +99,9 @@ public class CalendarSanityChecker {
         return unlockTime;
     }
 
-    public static synchronized CalendarSanityChecker getInstance(Context context) {
+    public static synchronized CalendarConfidenceChecker getInstance(Context context) {
         if (sInstance == null) {
-            sInstance = new CalendarSanityChecker(context);
+            sInstance = new CalendarConfidenceChecker(context);
         }
         return sInstance;
     }

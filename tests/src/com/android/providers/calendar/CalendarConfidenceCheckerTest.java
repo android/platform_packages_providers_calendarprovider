@@ -19,9 +19,9 @@ import android.content.Context;
 import android.test.AndroidTestCase;
 import android.text.format.DateUtils;
 
-public class CalendarSanityCheckerTest extends AndroidTestCase {
-    private class CalendarSanityCheckerTestable extends CalendarSanityChecker {
-        protected CalendarSanityCheckerTestable(Context context) {
+public class CalendarConfidenceCheckerTest extends AndroidTestCase {
+    private class CalendarConfidenceCheckerTestable extends CalendarConfidenceChecker {
+        protected CalendarConfidenceCheckerTestable(Context context) {
             super(context);
         }
 
@@ -46,7 +46,7 @@ public class CalendarSanityCheckerTest extends AndroidTestCase {
     private long mInjectedUnlockTime = 0;
 
     public void testWithoutLastCheckTime() {
-        CalendarSanityCheckerTestable target = new CalendarSanityCheckerTestable(getContext());
+        CalendarConfidenceCheckerTestable target = new CalendarConfidenceCheckerTestable(getContext());
         target.mPrefs.edit().clear().commit();
 
         assertTrue(target.checkLastCheckTime());
@@ -62,7 +62,7 @@ public class CalendarSanityCheckerTest extends AndroidTestCase {
     }
 
     public void testWithLastCheckTime() {
-        CalendarSanityCheckerTestable target = new CalendarSanityCheckerTestable(getContext());
+        CalendarConfidenceCheckerTestable target = new CalendarConfidenceCheckerTestable(getContext());
         target.mPrefs.edit().clear().commit();
 
         assertTrue(target.checkLastCheckTime());

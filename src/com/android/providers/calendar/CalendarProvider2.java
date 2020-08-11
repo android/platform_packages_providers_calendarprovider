@@ -851,7 +851,7 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sortOrder) {
-        CalendarSanityChecker.getInstance(mContext).checkLastCheckTime();
+        CalendarConfidenceChecker.getInstance(mContext).checkLastCheckTime();
 
         // Note don't use mCallingUid here. That's only used by mutation functions.
         final int callingUid = Binder.getCallingUid();
@@ -2325,7 +2325,7 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "insertInTransaction: " + uri);
         }
-        CalendarSanityChecker.getInstance(mContext).checkLastCheckTime();
+        CalendarConfidenceChecker.getInstance(mContext).checkLastCheckTime();
 
         validateUriParameters(uri.getQueryParameterNames());
         final int match = sUriMatcher.match(uri);
@@ -3315,7 +3315,7 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "deleteInTransaction: " + uri);
         }
-        CalendarSanityChecker.getInstance(mContext).checkLastCheckTime();
+        CalendarConfidenceChecker.getInstance(mContext).checkLastCheckTime();
 
         validateUriParameters(uri.getQueryParameterNames());
         final int match = sUriMatcher.match(uri);
@@ -4194,7 +4194,7 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "updateInTransaction: " + uri);
         }
-        CalendarSanityChecker.getInstance(mContext).checkLastCheckTime();
+        CalendarConfidenceChecker.getInstance(mContext).checkLastCheckTime();
 
         validateUriParameters(uri.getQueryParameterNames());
         final int match = sUriMatcher.match(uri);
@@ -4565,7 +4565,7 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
             // TODO review this list, document in contract.
             if (!TextUtils.isEmpty(selection)) {
                 // Only allow selections for the URIs that can reasonably use them.
-                // Whitelist of URIs allowed selections
+                // Allowed list of URIs allowed selections
                 switch (uriMatch) {
                     case SYNCSTATE:
                     case CALENDARS:
@@ -4582,7 +4582,7 @@ public class CalendarProvider2 extends SQLiteContentProvider implements OnAccoun
                 }
             } else {
                 // Disallow empty selections for some URIs.
-                // Blacklist of URIs _not_ allowed empty selections
+                // Disallowed list of URIs _not_ allowed empty selections
                 switch (uriMatch) {
                     case EVENTS:
                     case ATTENDEES:

@@ -448,7 +448,7 @@ public class CalendarDatabaseHelperTest extends TestCase {
         }
     }
 
-    private static final String SQLITE_MASTER = "sqlite_master";
+    private static final String SQLITE_PRIMARY = "sqlite_master";
 
     private static final String[] PROJECTION = {"tbl_name", "sql"};
 
@@ -460,9 +460,9 @@ public class CalendarDatabaseHelperTest extends TestCase {
         cDbHelper.onCreate(mGoodDb);
         cDbHelper.onUpgrade(mBadDb, 50, CalendarDatabaseHelper.DATABASE_VERSION);
         // Check that for all tables, schema definitions are the same between updated db and new db.
-        Cursor goodCursor = mGoodDb.query(SQLITE_MASTER, PROJECTION, null, null, null, null,
+        Cursor goodCursor = mGoodDb.query(SQLITE_PRIMARY, PROJECTION, null, null, null, null,
                 "tbl_name,sql" /* orderBy */);
-        Cursor badCursor = mBadDb.query(SQLITE_MASTER, PROJECTION, null, null, null, null,
+        Cursor badCursor = mBadDb.query(SQLITE_PRIMARY, PROJECTION, null, null, null, null,
                 "tbl_name,sql" /* orderBy */);
 
         while (goodCursor.moveToNext()) {
