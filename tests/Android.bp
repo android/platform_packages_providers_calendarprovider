@@ -1,3 +1,7 @@
+package {
+    default_applicable_licenses: ["packages_providers_CalendarProvider_license"],
+}
+
 android_test {
     name: "CalendarProviderTests",
     // Include all test java files.
