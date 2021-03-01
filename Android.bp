@@ -36,6 +36,7 @@ license {
 android_app {
     name: "CalendarProvider",
     static_libs: [
+        "error_prone_annotations",
         "guava",
         "android-common",
         "calendar-common",
